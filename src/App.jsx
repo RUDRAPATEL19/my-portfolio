@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { projects, skills } from './data';
+import emailjs from '@emailjs/browser';
+
 
 const NAV_ITEMS = [
   { id: 'hero', label: 'Home' },
@@ -328,9 +330,41 @@ function Skills() {
 }
 
 function Contact() {
-  const handleSubmit = e => {
+  const [status, setStatus] = useState({ type: '', msg: '' });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('This is a demo. Wire this up to your email service later!');
+    setStatus({ type: '', msg: '' });
+    setLoading(true);
+
+    const form = e.currentTarget;
+
+    const data = {
+      from_name: form.name.value,
+      from_email: form.email.value,
+      message: form.message.value,
+    };
+
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        data,
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      );
+
+      setStatus({ type: 'success', msg: 'Message sent! I will reply soon.' });
+      form.reset();
+    } catch (err) {
+      console.error(err);
+      setStatus({
+        type: 'error',
+        msg: 'Failed to send. Please try again or email me directly.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -339,35 +373,44 @@ function Contact() {
         <h2>Contact</h2>
         <p>Let&apos;s build something great together.</p>
       </div>
+
       <div className="contact-grid">
         <form className="glass contact-form" onSubmit={handleSubmit}>
           <div className="form-row">
             <label htmlFor="name">Name</label>
-            <input id="name" placeholder="Your name" required />
+            <input id="name" name="name" placeholder="Your name" required />
           </div>
+
           <div className="form-row">
             <label htmlFor="email">Email</label>
-            <input id="email" type="email" placeholder="you@example.com" required />
+            <input id="email" name="email" type="email" placeholder="you@example.com" required />
           </div>
+
           <div className="form-row">
             <label htmlFor="message">Message</label>
             <textarea
               id="message"
+              name="message"
               rows="4"
               placeholder="Tell me a bit about your project or opportunity..."
               required
             />
           </div>
-          <button type="submit" className="btn primary full-width">
-            Send Message
+
+          <button type="submit" className="btn primary full-width" disabled={loading}>
+            {loading ? 'Sending…' : 'Send Message'}
           </button>
+
+          {status.msg && (
+            <p style={{ marginTop: '0.8rem', color: status.type === 'error' ? '#fca5a5' : '#86efac' }}>
+              {status.msg}
+            </p>
+          )}
         </form>
 
         <div className="glass contact-info">
           <h3>Let&apos;s connect</h3>
-          <p>
-            Feel free to reach out for collaborations, opportunities, or just to say hi.
-          </p>
+          <p>Feel free to reach out for collaborations, opportunities, or just to say hi.</p>
           <ul className="contact-list">
             <li>
               <span className="contact-label">Email</span>
@@ -391,6 +434,7 @@ function Contact() {
     </section>
   );
 }
+
 
 /* ---------------- SMALL COMPONENTS ---------------- */
 
