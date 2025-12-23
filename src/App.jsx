@@ -100,9 +100,13 @@ export default function App() {
     <div className="app-root">
       {/* Custom cursor */}
       <div
-        className="cursor-dot"
-        style={{ transform: `translate(${cursorPos.x}px, ${cursorPos.y}px)` }}
-      />
+      className="cursor-dot"
+      style={{
+        left: `${cursorPos.x}px`,
+        top: `${cursorPos.y}px`,
+      }}
+    />
+
 
       {/* Background gradient & blobs */}
       <div className="bg-gradient" />
